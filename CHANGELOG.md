@@ -18,6 +18,8 @@ First open-source release.
   pyannote runs in its own environment (`uv run --script`), results are cached per file and settings.
 - `--speakers`, `prediction.num_speakers` / `min_speakers` / `max_speakers`: expected number of speakers.
 - `--no-predictions`: annotate without predictions.
+- `diarist` stops at the start if its port is in use, naming the file another diarist there shows,
+  instead of opening the browser on that other server.
 - `diarist-der`: diarization error rate of predictions against a ground truth (RTTM, audformat CSV or
   annotation folder) with audmetric; `--pyannote` adds pyannote for comparison.
 - Example: one minute of the AMI Meeting Corpus (CC BY 4.0) with four speakers and a reference annotation,

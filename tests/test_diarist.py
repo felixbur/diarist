@@ -279,3 +279,39 @@ def test_load_predictions_with_and_without_token(tmp_path, monkeypatch):
     other = {**config, "num_speakers": 5}
     assert len(load_predictions(store, str(audio), other)) == 2  # other settings, no token: the stored ones
     assert len(calls.read_text().splitlines()) == 1
+
+
+def test_port_in_use_names_running_diarist(tmp_path):
+    import socket
+    import threading
+
+    import uvicorn
+
+    from diarist.__main__ import port_in_use, running_diarist
+
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        free = sock.getsockname()[1]
+    assert not port_in_use("127.0.0.1", free)
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        port = sock.getsockname()[1]
+        sock.listen()
+        assert port_in_use("127.0.0.1", port)
+        assert running_diarist(f"http://127.0.0.1:{port}") is None  # listens, but no diarist (no answer)
+
+    audio = tmp_path / "a.wav"
+    sf.write(audio, np.zeros(16000, dtype=np.float32), 16000)
+    app = create_app(annotation(str(audio)), Store(tmp_path / "out"), PREDICTIONS, audio, np.zeros(4, np.int8), 200)
+    server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=0, log_level="warning"))
+    thread = threading.Thread(target=server.run, daemon=True)
+    thread.start()
+    try:
+        while not server.started:
+            thread.join(0.05)
+        port = server.servers[0].sockets[0].getsockname()[1]
+        assert port_in_use("127.0.0.1", port)
+        assert running_diarist(f"http://127.0.0.1:{port}") == "a.wav"
+    finally:
+        server.should_exit = True
+        thread.join(5)

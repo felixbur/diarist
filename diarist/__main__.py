@@ -6,9 +6,12 @@
 """
 
 import argparse
+import json
 import logging
 import os
 import pathlib
+import socket
+import urllib.request
 import webbrowser
 
 import soundfile as sf
@@ -62,6 +65,30 @@ def find_annotation(audio: str) -> pathlib.Path | None:
     return None
 
 
+def port_in_use(host: str, port: int) -> bool:
+    """Whether a server already listens on ``host:port``."""
+    with socket.socket(socket.AF_INET6 if ":" in host else socket.AF_INET) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # as uvicorn: a just stopped server does not count
+        try:
+            sock.bind((host, port))
+        except OSError:
+            return True
+    return False
+
+
+def running_diarist(url: str) -> str | None:
+    """Name of the audio file a diarist server at ``url`` shows, ``None`` if it is no diarist."""
+    try:
+        with urllib.request.urlopen(f"{url}/api/session", timeout=2) as response:
+            return json.load(response)["name"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def view_url(host: str, port: int) -> str:
+    return f"http://{'localhost' if host in ('0.0.0.0', '127.0.0.1') else host}:{port}"
+
+
 def load_predictions(store: Store, audio: str, config: dict, repredict: bool = False) -> list[Turn]:
     """Predictions of ``audio``: the stored ones if made with the current settings, else new ones
     if there is a Hugging Face token, else the stored ones or none.
@@ -105,6 +132,17 @@ def main():
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
     config = load_config(args.config)
+    host = args.host or config["server"]["host"]
+    port = args.port or config["server"]["port"]
+    if port_in_use(host, port):  # checked first, not after a possibly long prediction
+        url = view_url(host, port)
+        other = running_diarist(url)
+        what = f"another diarist, annotating {other}" if other else "another program"
+        parser.exit(
+            1,
+            f"Error: port {port} is in use by {what} ({url}).\n"
+            f"Stop it (Ctrl+C in its terminal) or choose another port, e.g. --port {port + 1}\n",
+        )
     if args.speakers is not None:
         config["prediction"]["num_speakers"] = args.speakers or None
     audio = os.path.abspath(args.audio)
@@ -149,9 +187,7 @@ def main():
         annotation, store, predictions, playback, envelope(signal, SAMPLING_RATE, rate), rate, config["view"]["merge_gap"]
     )
 
-    host = args.host or config["server"]["host"]
-    port = args.port or config["server"]["port"]
-    url = f"http://{'localhost' if host in ('0.0.0.0', '127.0.0.1') else host}:{port}"
+    url = view_url(host, port)
     print(f"\n  Annotate {os.path.basename(audio)} at {url}\n  Ground truth in {store.dir}\n", flush=True)
     if not args.no_browser:
         webbrowser.open(url)
