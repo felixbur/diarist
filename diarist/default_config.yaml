@@ -1,0 +1,27 @@
+# Default configuration. Override any part with: diarist --config my.yaml
+
+server:
+  host: 127.0.0.1
+  port: 8001
+
+storage:
+  root: annotations       # one sub folder per audio file
+
+view:
+  merge_gap: 0.5          # seconds; "Copy all predictions" joins segments of a speaker closer than this
+  waveform_rate: 200      # envelope values per second sent to the view
+
+# Speaker predictions with pyannote, shown as reference while labelling. The pipelines are gated:
+# accept their conditions on huggingface.co and give a token of that account: here, in HF_TOKEN
+# or with hf auth login (in this order).
+# Without a token, diarist starts without predictions.
+prediction:
+  hf_token: null          # hf_...; null: HF_TOKEN, else the hf auth login token. Keep a file with it private!
+  model: pyannote/speaker-diarization-community-1   # or pyannote/speaker-diarization-3.1, ...
+  num_speakers: null      # fixed number of speakers (--speakers); null: detect
+  min_speakers: null      # ... or limits for the detected number
+  max_speakers: null
+  device: auto            # auto: GPU if available, else CPU | cuda | cpu
+  command: [uv, run, --script]   # runs diarist/model/pyannote_run.py in its own environment (torch);
+                                 # [/path/to/python]: an environment with pyannote.audio 4
+  cache: ~/.cache/diarist/pyannote   # results per audio file and settings

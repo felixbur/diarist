@@ -1,0 +1,54 @@
+[project]
+name = "diarist"
+version = "1.0.0"
+description = "Manual ground-truth labelling for speaker diarization, with pyannote predictions as reference"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Felix Burkhardt" }]
+requires-python = ">=3.12"
+keywords = ["speaker diarization", "annotation", "ground truth", "pyannote", "audio"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "audformat",
+    "audmetric",
+    "audresample",
+    "fastapi",
+    "numpy",
+    "pandas",
+    "pydantic>=2",
+    "pyyaml",
+    "soundfile",
+    "uvicorn[standard]",
+]
+# pyannote (torch) is not a dependency: it runs in its own environment, see diarist/model/pyannote_run.py
+
+[project.urls]
+Homepage = "https://github.com/felixbur/diarist"
+Issues = "https://github.com/felixbur/diarist/issues"
+Changelog = "https://github.com/felixbur/diarist/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = ["pytest", "httpx"]
+docs = ["sphinx", "furo", "sphinx-copybutton", "myst-parser"]
+
+[project.scripts]
+diarist = "diarist.__main__:main"
+diarist-der = "diarist.controller.evaluation:main"
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["diarist*"]
+
+[tool.setuptools.package-data]
+diarist = ["default_config.yaml", "view/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

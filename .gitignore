@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.egg-info/
+annotations/
+.pytest_cache/
+build/
+docs/_generated/
+# audio and local configurations (may contain a Hugging Face token)
+*.wav
+*.local.yaml

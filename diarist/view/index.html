@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diarist</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>Diarist</h1>
+    <div id="file" class="muted"></div>
+    <button id="play" class="text" title="Play / pause from the playhead (Space)">▶ Play</button>
+    <div id="clock" class="muted"></div>
+    <div class="spacer"></div>
+    <button id="zoom-out" title="Zoom out (-)" aria-label="Zoom out">−</button>
+    <button id="zoom-in" title="Zoom in (+)" aria-label="Zoom in">+</button>
+    <button id="fit" class="text" title="Show the whole file (0)">Fit</button>
+    <button id="undo" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+    <button id="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↷</button>
+    <div id="der" class="pill" title="Diarization error rate of the predictions on the part labelled so far"></div>
+    <div id="save" class="pill">loading…</div>
+  </header>
+  <section id="speakers"></section>
+  <section id="selection"></section>
+  <main>
+    <canvas id="timeline"></canvas>
+  </main>
+  <footer class="muted">
+    Select a range (drag on the waveform, or click a predicted segment / <kbd>Tab</kbd>) and press
+    <kbd>1</kbd>–<kbd>9</kbd>: that part becomes this speaker's (<kbd>Del</kbd>: silence) ·
+    Ground truth: click to select, drag edges to resize, drag the body to move ·
+    Wheel: zoom · Shift+wheel or drag the time axis: scroll ·
+    <kbd>Space</kbd> play · <kbd>Enter</kbd> play selection · <kbd>←</kbd><kbd>→</kbd> previous/next segment ·
+    <kbd>S</kbd> split at playhead · <kbd>M</kbd> merge with next · <kbd>Ctrl+Z</kbd> undo
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
