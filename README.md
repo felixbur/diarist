@@ -2,6 +2,8 @@
 
 Label ground truth for speaker diarization ("who speaks when") in the browser.
 
+[Pages are here](https://felixbur.github.io/diarist/)
+
 Diarist shows an audio file on a zoomable timeline with its waveform. You mark speech segments and assign them to
 speakers. Every change is saved straight away as audformat CSV, RTTM and Praat TextGrid.
 If you have a [Hugging Face](https://huggingface.co) token, [pyannote](https://github.com/pyannote/pyannote-audio)
